@@ -53,7 +53,7 @@ def sql_insert(keyword,score_sum,middle_article):
         with conn:
                     with conn.cursor() as cur:
                         
-                        cur.execute(sql, (middle_article['title'],score_sum,keyword,middle_article['score'],middle_article['fetch_datetime']))
+                        cur.execute(sql, (middle_article['title'],middle_article['url'],keyword,middle_article['score'],middle_article['fetch_datetime']))
                         cur.execute(DELETE_TITLE)
                         print("\nSQL = "+sql % (middle_article['title'],score_sum,keyword,middle_article['score'],middle_article['fetch_datetime']))
                         conn.commit()
