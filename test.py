@@ -107,7 +107,7 @@ def get_result(keyword):
 
     articles = newsapi.get_everything(qintitle=keyword,
                                       domains=NEWS_LIST,
-                                      from_param = d_today - timedelta(days=5),
+                                      from_param = d_today - timedelta(days=2),
                                       to = d_today,
                                       language='en',
                                       sort_by="publishedAt",
@@ -132,7 +132,7 @@ def get_result(keyword):
         middle_article['fetch_datetime'] = datetime.now()
         final_articles.append(middle_article)
         
-        if len(final_articles) >= 10:
+        if len(final_articles) >= 100:
             break
         
         if sql_insert(keyword,middle_article):
