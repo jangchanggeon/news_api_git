@@ -33,7 +33,7 @@ def convert_datetime_gmt9(gmt0_str):
     return gmt9_str
     
 #sql insert 함수
-def sql_insert(keyword,score_sum,middle_article):
+def sql_insert(keyword,middle_article):
     conn = pymysql.connect(host='115.22.125.154',
                         user='root',
                         password='142536nM@@',
@@ -43,7 +43,7 @@ def sql_insert(keyword,score_sum,middle_article):
     
     # if keyword!="":    
     if keyword != "":
-        sql = "INSERT INTO news_api (title,score_sum,searchin,source,newsdate) VALUES (%s, %s,%s,%s,%s)"
+        sql = "INSERT INTO news_api (title,url_link,searchin,score,newsdate) VALUES (%s, %s,%s,%s,%s)"
         #중복값 제거
         DELETE_TITLE = "DELETE a FROM news_api a, news_api b where a.index_auto < b.index_auto AND a.title = b.title;"
 
@@ -55,7 +55,9 @@ def sql_insert(keyword,score_sum,middle_article):
                         
                         cur.execute(sql, (middle_article['title'],middle_article['url'],keyword,middle_article['score'],middle_article['fetch_datetime']))
                         cur.execute(DELETE_TITLE)
-                        print("\nSQL = "+sql % (middle_article['title'],score_sum,keyword,middle_article['score'],middle_article['fetch_datetime']))
+                        deleted_row_count = cur.rowcount
+                        print("\nSQL = "+sql % (middle_article['title'],middle_article['url'],keyword,middle_article['score'],middle_article['fetch_datetime']))
+                        print("deleted_row_count : ",deleted_row_count)
                         conn.commit()
                         return True
 
@@ -95,6 +97,7 @@ def get_emotion(score):
 def autocall_write(keyword, middle_article,score_sum,avg_score_title,avg_magnitude_title,sentiment_avg):
         now = datetime.now()
         f_autocall = open("C:/새 폴더/autocall_{0}.txt".format(now.strftime("%y%m%d")),'a',encoding='utf-8')
+        f_autocall.write("-------------------------------------")
         f_autocall.write(now.strftime('%Y-%m-%d %H:%M:%S')+"키워드 :"+keyword+"\n"+"기사 개수 :"+str(len(middle_article))+"\n"+"Score :"+str(score_sum)+"\n"+"점수 평균:"+str(avg_score_title)+"\n"+"magnitude :"+str(avg_magnitude_title)+"\n"+"감정 :"+ str(sentiment_avg)+"\n\n\n")
         f_autocall.close()
 
@@ -112,7 +115,7 @@ def get_result(keyword):
     final_articles = []
     score_sum = 0
     magnitude_sum = 0
-    
+    # Todo deleted count 개선하기
     for article in articles:
         title_score = ''
         title_magnitude = ''
@@ -132,7 +135,7 @@ def get_result(keyword):
         if len(final_articles) >= 10:
             break
         
-        if sql_insert(keyword,score_sum,middle_article):
+        if sql_insert(keyword,middle_article):
             print("\nSQL-insert-OKAY---------------------------------------------------\n") 
         
         else:
@@ -164,8 +167,12 @@ def home():
         avg_score_title = 0
         avg_magnitude_title = 0
         return render_template("fail.html")
-    
-    
+
+@app.route("/graph_test", methods=['GET', 'POST'])
+
+def graph_test():
+    return render_template("index.html")
+
     
 @app.route("/db_write", methods=['GET', 'POST'])
 
